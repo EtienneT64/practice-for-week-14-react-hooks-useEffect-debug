@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import User from './User';
 
@@ -8,21 +8,23 @@ const RandomUserTwo = () => {
   const [num, setNum] = useState(0);
   const [searchChange, setSearchChange] = useState('');
   const [searchWord, setSearchWord] = useState(
-    localStorage.setItem('user') || 'foobar'
+    localStorage.getItem('user') || 'foobar'
   );
-  
+
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    const fetchUser = () => {
+    const fetchUser = async () => {
       const res = await fetch(`https://randomuser.me/api/?seed=${searchWord}`);
       const data = await res.json();
       setData(data.results);
     };
-  }, []);
+
+    fetchUser();
+  }, [searchWord]);
 
   useEffect(() => {
-    localStorage.getItem('user', searchWord);
+    localStorage.setItem('user', searchWord);
   }, [searchWord]);
 
   useEffect(() => {
@@ -30,22 +32,29 @@ const RandomUserTwo = () => {
       console.log('i am running');
       setNum((prevNum) => (prevNum === 3 ? 0 : prevNum + 1));
     }, 7000);
+
+    return () => {
+      clearInterval(colorInterval);
+    };
   }, []);
 
   return (
     <div
       style={{
         backgroundColor: colors[num],
-        transition: 'background-color 4s'
+        transition: 'background-color 4s',
       }}
-      className='container'
+      className="container"
     >
-      <div className='person'>
+      <div className="person">
         {data?.map((data) => (
-          <User key={data.id.value} data={data} />
+          <User
+            key={data.id.value}
+            data={data}
+          />
         ))}
       </div>
-      <div className='form-wrapper'>
+      <div className="form-wrapper">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -53,15 +62,15 @@ const RandomUserTwo = () => {
             setSearchChange('');
           }}
         >
-          <label htmlFor='search'>Search:</label>
+          <label htmlFor="search">Search:</label>
           <input
-            id='search'
+            id="search"
             onChange={(e) => setSearchChange(e.target.value)}
             value={searchChange}
-            name='searchWord'
-            placeholder='Username'
+            name="searchWord"
+            placeholder="Username"
           />
-          <button type='submit'>Submit</button>
+          <button type="submit">Submit</button>
         </form>
       </div>
     </div>
